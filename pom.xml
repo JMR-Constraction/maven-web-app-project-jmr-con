@@ -98,13 +98,13 @@
 	    <repository>
 	      <id>nexus</id>
 	      <name> jmr Releases Nexus Repository</name>
-	      <url>http://13.127.96.25:8081/repository/jmr-release/</url>
+	      <url>http://43.205.98.4:8081//repository/jmr-release/</url>
 	    </repository>
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>jmr Snapshot Nexus Repository </name>
-	      <url>http://13.127.96.25:8081/repository/jmr-snapshot/</url>
+	      <url>http://43.205.98.4:8081/repository/jmr-snapshot/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
