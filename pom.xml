@@ -21,7 +21,7 @@
 		<spring.version>5.3.34</spring.version>
 		<junit.version>4.11</junit.version>
 		<log4j.version>1.2.17</log4j.version>
-		<sonar.host.url>http://13.233.244.71:9000/</sonar.host.url>
+		<sonar.host.url>http://13.232.199.188:9000/</sonar.host.url>
 		<sonar.login>admin</sonar.login>
 		<sonar.password>admin123</sonar.password> 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -98,13 +98,13 @@
 	    <repository>
 	      <id>nexus</id>
 	      <name> jmr Releases Nexus Repository</name>
-	      <url>http://43.205.98.4:8081/repository/jmr-release/</url>
+	      <url>http://13.126.78.221:8081/repository/jmr-release/</url>
 	    </repository>
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>jmr Snapshot Nexus Repository </name>
-	      <url>http://43.205.98.4:8081/repository/jmr-snapshot/</url>
+	      <url>http://13.126.78.221:8081/repository/jmr-snapshot/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
