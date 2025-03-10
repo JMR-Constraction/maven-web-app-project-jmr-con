@@ -104,7 +104,7 @@
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>jmr Snapshot Nexus Repository </name>
-	      <url>http://13.234.232.103:8081:8081/repository/mvn-snapshot/</url>
+	      <url>http://13.234.232.103:8081/repository/mvn-snapshot/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
