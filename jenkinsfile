@@ -8,7 +8,7 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 notifyBuild('STARTED')
-                git branch: 'dev', credentialsId: 'c12bc9a7-aa90-4822-9c84-77625cfaa039', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
+                git branch: 'prod', credentialsId: 'c12bc9a7-aa90-4822-9c84-77625cfaa039', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
             }
         }
 
