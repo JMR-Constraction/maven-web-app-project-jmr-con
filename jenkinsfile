@@ -34,7 +34,7 @@ pipeline{
               		sshagent(['amazon-1']) {
 
     				sh "ssh ec2-user@13.235.134.217 'sudo /opt/tomcat/bin/shutdown.sh'"
-    				sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.235.134.21:/opt/tomcat/webapps"
+    				sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.235.134.217:/opt/tomcat/webapps"
     				sh "ssh ec2-user@13.235.134.217 'sudo /opt/tomcat/bin/startup.sh'"
 
     				 
