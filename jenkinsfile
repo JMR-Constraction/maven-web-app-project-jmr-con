@@ -1,0 +1,82 @@
+pipeline{
+	agent any //run on any agent
+
+	tools{
+
+	maven="mvn"
+	}
+
+     stages{
+           stage('Git Checkout'){
+              steps{
+              notifyBuild('STARTED')
+              git branch: 'dev', credentialsId: 'c12bc9a7-aa90-4822-9c84-77625cfaa039', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
+              }
+
+              }
+              stage('maven install'){
+              steps{
+                 sh "mvn clean install"
+              }
+            }
+              stage('Soanr report'){
+              steps{
+                  sh "mvn sonar:sonar"
+              }
+              }
+              stage('nexus'){
+              steps{
+              		sh "mvn deploy"
+              }
+              }
+              stage('Deploy'){
+              steps{
+              		sshagent(['amazon-1']) {
+
+    				sh "ssh ec2-user@13.235.134.217 'sudo /opt/tomcat/bin/shutdown.sh'"
+    				sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.235.134.21:/opt/tomcat/webapps"
+    				sh "ssh ec2-user@13.235.134.217 'sudo /opt/tomcat/bin/startup.sh'"
+
+    				 
+
+
+              }
+           }	
+        }
+    }
+}
+post {
+  success {
+    notifyBuild(currentBuild.result)
+  }
+  failure {
+notifyBuild(currentBuild.result)
+      }
+}//pipeline closing
+
+
+def notifyBuild(String buildStatus = 'STARTED') {
+  // build status of null means successful
+  buildStatus =  buildStatus ?: 'SUCCESS'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESS') {
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    color = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: summary, channel: '#dev-111')
+}
