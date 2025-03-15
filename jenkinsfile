@@ -53,7 +53,7 @@ pipeline {
 
         stage('Deploy to Tomcat') {
             steps {
-                sshagent(['amazon-1']) {
+                sshagent(['pipeline-key']) {
                     script {
                         try {
                             sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/shutdown.sh'"
