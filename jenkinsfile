@@ -56,9 +56,9 @@ pipeline {
                 sshagent(['amazon-1']) {
                     script {
                         try {
-                            sh "ssh ec2-user@13.235.134.217 'sudo /opt/tomcat/bin/shutdown.sh'"
+                            sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/shutdown.sh'"
                             sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.235.134.217:/opt/tomcat/webapps"
-                            sh "ssh ec2-user@13.235.134.217 'sudo /opt/tomcat/bin/startup.sh'"
+                            sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/startup.sh'"
                         } catch (Exception e) {
                             currentBuild.result = 'FAILURE'
                             throw e
