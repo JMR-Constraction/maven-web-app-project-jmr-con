@@ -1,0 +1,82 @@
+pipeline {
+    agent any 
+    tools {
+        maven "mvn"
+    }
+
+    stages {
+        stage('Checkout Stage') { 
+            steps {
+                notifyBuild('STARTED')
+                git branch: 'prod', credentialsId: '36ce66a1-7e2e-4bb3-ba3e-c7ba4f2700b1', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
+            }
+        }
+        
+        stage('Build') { 
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        
+        stage('SQREPORT') {
+            steps {
+                sh "mvn sonar:sonar"
+            }
+        }
+        
+        stage('Deploy to Nexus') {
+            steps {
+                sh "mvn deploy"
+            }
+        }
+        
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['pipeline-key']) {
+                    sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/shutdown.sh'"
+                    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.233.198.189:/opt/tomcat/webapps/"
+                    sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/startup.sh'"
+                }
+            }
+        }
+    } // Stages closing
+
+    post {
+        success {
+            script {
+                notifyBuild(currentBuild.result)
+            }
+        }
+        failure {
+            script {
+                notifyBuild(currentBuild.result)
+            }
+        }
+    }
+} // Pipeline closing
+
+// Notification Function
+void notifyBuild(String buildStatus) {
+    buildStatus = buildStatus ?: 'SUCCESS'
+
+    def colorName = 'RED'
+    def colorCode = '#FF0000'
+    def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+    def summary = "${subject} (${env.BUILD_URL})"
+
+    if (buildStatus == 'STARTED') {
+        colorName = 'YELLOW'
+        colorCode = '#FFFF00'
+    } else if (buildStatus == 'SUCCESS') {
+        colorName = 'GREEN'
+        colorCode = '#00FF00'
+    }
+
+    // List of Slack channels to notify
+    def slackChannels = ['#dev-111', '#ggg']
+
+    // Send notifications to all channels
+    for (channel in slackChannels) {
+        slackSend(color: colorCode, message: summary, channel: channel)
+}
+}
