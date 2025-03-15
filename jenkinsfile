@@ -1,108 +1,82 @@
 pipeline {
-    agent any // run on any agent
+    agent any 
     tools {
         maven "mvn"
     }
 
     stages {
-        stage('Git Checkout') {
+        stage('Checkout Stage') { 
             steps {
                 notifyBuild('STARTED')
-                git branch: 'prod', credentialsId: 'c12bc9a7-aa90-4822-9c84-77625cfaa039', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
+                git branch: 'prod', credentialsId: '36ce66a1-7e2e-4bb3-ba3e-c7ba4f2700b1', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
             }
         }
-
-        stage('Maven Install') {
+        
+        stage('Build') { 
             steps {
-                script {
-                    try {
-                        sh "mvn clean install"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
+                sh "mvn clean package"
             }
         }
-
-        stage('SonarQube Analysis') {
+        
+        stage('SQREPORT') {
             steps {
-                script {
-                    try {
-                        sh "mvn sonar:sonar"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
+                sh "mvn sonar:sonar"
             }
         }
-
-        stage('Nexus Deployment') {
+        
+        stage('Deploy to Nexus') {
             steps {
-                script {
-                    try {
-                        sh "mvn deploy"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
+                sh "mvn deploy"
             }
         }
-
-        stage('Deploy to Tomcat') {
+        
+        stage('Deploy to EC2') {
             steps {
                 sshagent(['pipeline-key']) {
-                    script {
-                        try {
-                            sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/shutdown.sh'"
-                            sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.235.134.217:/opt/tomcat/webapps"
-                            sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/startup.sh'"
-                        } catch (Exception e) {
-                            currentBuild.result = 'FAILURE'
-                            throw e
-                        }
-                    }
+                    sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/shutdown.sh'"
+                    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.233.198.189:/opt/tomcat/webapps/"
+                    sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/startup.sh'"
                 }
             }
         }
-    }
+    } // Stages closing
 
     post {
         success {
-            notifyBuild(currentBuild.result)
+            script {
+                notifyBuild(currentBuild.result)
+            }
         }
         failure {
-            notifyBuild(currentBuild.result)
+            script {
+                notifyBuild(currentBuild.result)
+            }
         }
     }
-}
+} // Pipeline closing
 
-// Custom notification function for Slack
-def notifyBuild(String buildStatus = 'STARTED') {
+// Notification Function
+void notifyBuild(String buildStatus) {
     buildStatus = buildStatus ?: 'SUCCESS'
+
+    def colorName = 'RED'
     def colorCode = '#FF0000'
     def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
     def summary = "${subject} (${env.BUILD_URL})"
-    
-    // Set notification color based on build status
+
     if (buildStatus == 'STARTED') {
-        colorCode = '#FFFF00' // Yellow for started
+        colorName = 'YELLOW'
+        colorCode = '#FFFF00'
     } else if (buildStatus == 'SUCCESS') {
-        colorCode = '#00FF00' // Green for success
+        colorName = 'GREEN'
+        colorCode = '#00FF00'
     }
 
-    // Send Slack notification
-    try {
-        slackSend(
-            color: colorCode,
-            message: summary,
-            channel: '#ggg', // Make sure this channel exists in your Slack workspace
-            teamDomain: 'your-team-domain', // If not configured globally, replace with your team's domain
-            token: 'your-slack-api-token' // Optionally, provide a token here if needed
-        )
-    } catch (Exception e) {
-        echo "Failed to send Slack notification: ${e.getMessage()}"
-    }
+    // List of Slack channels to notify
+    def slackChannels = ['#dev-111', '#ggg']
+
+    // Send notifications to all channels
+    for (channel in slackChannels) {
+        slackSend(color: colorCode, message: summary, channel: channel)
+    }
 }
