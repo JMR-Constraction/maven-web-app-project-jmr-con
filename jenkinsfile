@@ -8,7 +8,7 @@ pipeline {
         stage('Checkout Stage') { 
             steps {
                 notifyBuild('STARTED')
-                git branch: 'prod', credentialsId: '36ce66a1-7e2e-4bb3-ba3e-c7ba4f2700b1', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
+                git branch: 'dev', credentialsId: '36ce66a1-7e2e-4bb3-ba3e-c7ba4f2700b1', url: 'https://github.com/JMR-Constraction/maven-web-app-project-jmr-con.git'
             }
         }
         
@@ -33,9 +33,9 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['pipeline-key']) {
-                    sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/shutdown.sh'"
-                    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.233.198.189:/opt/tomcat/webapps/"
-                    sh "ssh ec2-user@13.233.198.189 'sudo /opt/tomcat/bin/startup.sh'"
+                    sh "ssh ec2-user@65.2.132.44 'sudo /opt/tomcat/bin/shutdown.sh'"
+                    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@65.2.132.44:/opt/tomcat/webapps/"
+                    sh "ssh ec2-user@65.2.132.44 'sudo /opt/tomcat/bin/startup.sh'"
                 }
             }
         }
