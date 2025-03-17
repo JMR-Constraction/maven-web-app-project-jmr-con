@@ -33,9 +33,9 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 sshagent(['pipeline-key']) {
-                    sh "ssh ec2-user@65.2.132.44 'sudo /opt/tomcat/bin/shutdown.sh'"
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@65.2.132.44 'sudo /opt/tomcat/bin/shutdown.sh'"
                     sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@65.2.132.44:/opt/tomcat/webapps/"
-                    sh "ssh ec2-user@65.2.132.44 'sudo /opt/tomcat/bin/startup.sh'"
+                    sh "ssh -o StrictHostKeyChecking=no ec2-user@65.2.132.44 'sudo /opt/tomcat/bin/startup.sh'"
                 }
             }
         }
